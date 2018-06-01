@@ -63,7 +63,7 @@
         for (let i in sqls) {
             if (i == 0) continue;
             curPromise = curPromise.then(() => {
-                return sqlTest(sqls[i]);
+                return sqlTest(sqls[i], info);
             });
         }
     }
