@@ -1,0 +1,97 @@
+<html>
+
+<head>
+    <title>SqlTester</title>
+    <script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ="
+        crossorigin="anonymous"></script>
+</head>
+
+<body>
+    <h1>SqlTester</h1>
+    <div style="display: flex;">
+        <textarea style="width:578px;height:200px;overflow-x:scroll;white-space:nowrap;" id="input"></textarea>
+        <button type="button" onclick="submit()" style="width:100px; height:200px;">테
+            <br>스
+            <br>트</button>
+    </div>
+    <div>
+        <textarea style="width:578px;height:400px;overflow-x:scroll;white-space:nowrap;" id="output"></textarea>
+    </div>
+    <div style="display: inline-flex;">
+        <div>
+            <div>주소:
+                <input type="text" id="ip">
+            </div>
+            <div>유저:
+                <input type="text" id="user">
+            </div>
+            <div>비번:
+                <input type="password" id="pw">
+            </div>
+            <div>디비:
+                <input type="text" id="db">
+            </div>
+        </div>
+        <div>
+            <textarea id="info" style="margin: 0px; width: 265px; height: 95px;"></textarea>
+        </div>
+        <button type="button" onclick="infoInit()" style="width:100px; height:95px;">입
+            <br>력</button>
+    </div>
+</body>
+<script>
+    function infoInit() {
+        $("#ip").val($("#info").val().split("\n")[0]);
+        $("#user").val($("#info").val().split("\n")[1]);
+        $("#pw").val($("#info").val().split("\n")[2]);
+        $("#db").val($("#info").val().split("\n")[3]);
+    }
+    $("#input").val("show tables;");
+    function submit() {
+        $("#output").val("");
+        let info = {
+            ip: $("#ip").val(),
+            user: $("#user").val(),
+            pw: $("#pw").val(),
+            db: $("#db").val(),
+        };
+        let sqls = $("#input").val().split(";")
+            .map(ele => (ele + ";")).filter((ele, seq, arr) => {
+                return seq != (arr.length - 1);
+            });
+        let curPromise = sqlTest(sqls[0], info);
+        for (let i in sqls) {
+            if (i == 0) continue;
+            curPromise = curPromise.then(() => {
+                return sqlTest(sqls[i]);
+            });
+        }
+    }
+    function sqlTest(sql, info) {
+        return new Promise((resolve, resolvereject) => {
+            let data = $.param({
+                sql: sql,
+                info: info
+            });
+            console.log(JSON.stringify(data, null, 2));
+
+            $.ajax({
+                url: "/api/sqlTest",
+                method: 'post',
+                data: data,
+                success: (a, b, c) => {
+                    $("#output").val($("#output").val() + JSON.stringify(a, null, 2)
+                        + "\n==================================================================\n");
+                    resolve(true);
+                },
+                error: (e) => {
+                    $("#output").val($("#output").val() + JSON.stringify(e, null, 2)
+                        + "\n==================================================================\n");
+                    resolve(fales);
+                }
+            });
+        });
+    }
+</script>
+
+</html>
