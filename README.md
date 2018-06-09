@@ -1,4 +1,4 @@
 # SqlTester
 SqlTester
-
-https://creaticoding.xyz
+only for mysql
+https://creaticoding.xyz/sqlTester
